@@ -1,21 +1,45 @@
-const User = require('../models/user')
 const asyncHandler = require('express-async-handler')
-const { gennerateAccessToken, gennerateRefreshToken } = require('../middlewares/jwt')
+const sendEmailHandler = require('./mail')
 
-const register = asyncHandler(async (req, res) => {
-    const { account, password, name } = req.body
-    if (!account || !password || !name) throw new Error('Missing inputs')
-    const response = await User.findOne({ account })
-    if (response) {
-        throw new Error('User has existed!')
-    } else {
-        const newUser = await User.create(req.body)
-        return res.status(200).json({
-            success: newUser ? true : false,
-            mes: newUser ? 'Register done! Please go login' : 'Something went wrong'
-        })
+const contactMail = asyncHandler(async (req, res) => {
+    const formData = req.body
+    if ( !formData.name || !formData.email || !formData.message ) throw new Error('Plz fill your form')
+    const autoResponse = {
+        from: 'Decoco Shop',
+        to: formData.email,
+        subject: 'Thank for your contribute',
+        html: `<h3>Hello ${formData.name},</h3>
+        <p>We got your message.</p>
+        <p>We'll check it and response for you as soon as.</p>
+        <br />
+        <br />
+        <b>Best regards,</b>
+        <br />
+        <b>Decoco Shop</b>`
     }
+
+    const emailMessage = {
+        from: 'Decoco Shop',
+        to: process.env.ADMIN_EMAIL,
+        subject: 'Contribute from client',
+        html: `<h3>Hello admin Decoco Shop,</h3>
+        <p>You got your message:</p>
+        <p>${formData.message}</p>
+        <br />
+        <br />
+        <b>Best regards,</b>
+        <br />
+        <b>Decoco Shop</b>`
+    }
+
+    await sendEmailHandler(autoResponse)
+    await sendEmailHandler(emailMessage)
+
+    return res.status(200).json({
+        success: true,
+        message: 'Check your email'
+    })
 })
 module.exports = {
-    register
+    contactMail
 }
