@@ -1,14 +1,23 @@
-const { default: mongoose } = require('mongoose')
-mongoose.set('strictQuery', false);
+const mysql = require('mysql2');
 
-const dbConnect = async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI)
-        console.log('DB connected successfully!');
-    } catch (error) {
-        console.log('DB connection failed!')
-        throw new Error(error)
-    }
+const dbConnect = () => {
+    const db = mysql.createPool({
+        connectionLimit: 10,
+        host: "127.0.0.1", // or your Docker host IP
+        user: "root",
+        password: "alandinh0203", // your MySQL root password
+        database: "decoco_shop", // replace with your database name
+        port: 33061,
+    });
+
+    db.getConnection((err, connection) => {
+        if (err) {
+            console.error("Error connecting to database: " + err.stack);
+            return;
+        }
+        console.log("Connected to database with threadId: " + connection.threadId);
+        connection.release();
+    });
 }
 
-module.exports = dbConnect
+module.exports = dbConnect;
