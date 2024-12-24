@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler')
-const sendEmailHandler = require('./mail')
+const sendEmailHandler = require('./mailer')
 
 const contactMail = asyncHandler(async (req, res) => {
     const formData = req.body
@@ -23,8 +23,9 @@ const contactMail = asyncHandler(async (req, res) => {
         to: process.env.ADMIN_EMAIL,
         subject: 'Contribute from client',
         html: `<h3>Hello admin Decoco Shop,</h3>
-        <p>You got your message:</p>
+        <p>You got your message from ${formData.name}:</p>
         <p>${formData.message}</p>
+        <p>Just response to ${formData.email}</p>
         <br />
         <br />
         <b>Best regards,</b>
